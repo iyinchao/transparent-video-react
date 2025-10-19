@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022"],
+    "allowJs": true,
+    "checkJs": false,
+    "types": ["node"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": false
+  },
+  "include": [
+    "*.config.*",
+    "**/*.config.ts",
+    "**/*.config.mts",
+    ".storybook/**/*.ts",
+    "scripts/**/*.ts",
+    "eslint.config.mjs",
+    "vitest.shims.d.ts"
+  ],
+  "exclude": ["dist", "coverage", "node_modules", "src", "stories"]
+}

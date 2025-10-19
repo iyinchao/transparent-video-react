@@ -1,0 +1,18 @@
+@layer transparent-video {
+  .__transparent-video__ {
+    --video-width: 300px;
+    --video-height: 150px;
+    --aspect-ratio: 2 / 1;
+
+    width: var(--video-width);
+    aspect-ratio: var(--aspect-ratio);
+    position: relative;
+    overflow: hidden;
+
+    canvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+  }
+}

@@ -2,10 +2,79 @@
   "name": "transparent-video-react",
   "version": "0.0.0",
   "description": "transparent video react component",
-  "main": "index.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iyinchao/transparent-video-react.git"
+  },
+  "main": "lib/transparent-video-react.cjs",
+  "module": "lib/transparent-video-react.mjs",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "import": "./lib/transparent-video-react.mjs",
+      "require": "./lib/transparent-video-react.cjs",
+      "default": "./lib/transparent-video-react.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite dev",
+    "build": "vite build",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,cjs,mjs,json,md,css,scss,html}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,cjs,mjs,json,md,css,scss,html}\"",
+    "typecheck": "tsc --project tsconfig.app.json --pretty --noEmit",
+    "typecheck:node": "tsc --project tsconfig.node.json --pretty",
+    "test": "vitest run",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "preview": "vite preview"
   },
   "author": "iyinchao <yincharles@163.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@chromatic-com/storybook": "^4.1.1",
+    "@eslint/js": "^9.38.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.0",
+    "@semantic-release/npm": "^13.0.0",
+    "@storybook/addon-a11y": "^9.1.13",
+    "@storybook/addon-docs": "^9.1.13",
+    "@storybook/addon-vitest": "^9.1.13",
+    "@storybook/react-vite": "^9.1.13",
+    "@types/node": "^24.8.1",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@typescript-eslint/eslint-plugin": "^8.46.1",
+    "@typescript-eslint/parser": "^8.46.1",
+    "@vitejs/plugin-react": "^5.0.4",
+    "@vitest/browser": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "eslint-plugin-storybook": "^9.1.13",
+    "globals": "^16.4.0",
+    "playwright": "^1.56.1",
+    "prettier": "^3.6.2",
+    "semantic-release": "^25.0.0",
+    "storybook": "^9.1.13",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.10",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^3.2.4"
+  }
 }
