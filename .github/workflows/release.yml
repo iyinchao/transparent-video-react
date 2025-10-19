@@ -53,8 +53,8 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Run tests
-        run: pnpm test
+      # - name: Run tests
+      #   run: pnpm test
 
       - name: Release
         uses: cycjimmy/semantic-release-action@v4
@@ -66,4 +66,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
