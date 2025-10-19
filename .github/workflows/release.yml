@@ -56,14 +56,6 @@ jobs:
       # - name: Run tests
       #   run: pnpm test
 
-      - name: Configure npm auth
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          unset NODE_AUTH_TOKEN
-          npm whoami
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Release
         uses: cycjimmy/semantic-release-action@v4
         with:
