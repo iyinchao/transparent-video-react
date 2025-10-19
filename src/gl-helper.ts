@@ -6,14 +6,26 @@ uniform sampler2D u_frame;
 
 // data
 uniform float u_premultipliedAlpha;
+uniform bool u_enableClip;
+uniform vec2 u_clipRatio;
 
 // the texCoords passed in from the vertex shader.
 varying vec2 v_texCoord;
 
 void main() {
+  vec2 colorCoord;
+  vec2 alphaCoord;
+
   // Calculate the coordinates for the color and alpha
-  vec2 colorCoord = vec2(v_texCoord.x, v_texCoord.y * 0.5);
-  vec2 alphaCoord = vec2(v_texCoord.x, 0.5 + v_texCoord.y * 0.5);
+  if (u_enableClip) {
+    float clippedX = u_clipRatio.x / 2.0 + v_texCoord.x * (1.0 - u_clipRatio.x);
+    float clippedY = u_clipRatio.y / 2.0 + v_texCoord.y * (1.0 - u_clipRatio.y);
+    colorCoord = vec2(clippedX, clippedY * 0.5);
+    alphaCoord = vec2(clippedX, 0.5 + clippedY * 0.5);
+  } else {
+    colorCoord = vec2(v_texCoord.x, v_texCoord.y * 0.5);
+    alphaCoord = vec2(v_texCoord.x, 0.5 + v_texCoord.y * 0.5);
+  }
 
   vec4 color = texture2D(u_frame, colorCoord);
   float alpha = texture2D(u_frame, alphaCoord).r;
@@ -79,6 +91,8 @@ type GLResources = {
 
 const resourcesMap = new WeakMap<WebGLRenderingContext | WebGL2RenderingContext, GLResources>();
 const premultipliedAlphaLocations = new WeakMap();
+const enableClipLocations = new WeakMap();
+const clipRatioLocations = new WeakMap();
 
 /**
  * Get a GL context for a canvas.
@@ -115,7 +129,12 @@ export function setupGLContext(canvas: HTMLCanvasElement | OffscreenCanvas) {
     context.getUniformLocation(program, 'u_premultipliedAlpha'),
   );
 
+  enableClipLocations.set(context, context.getUniformLocation(program, 'u_enableClip'));
+  clipRatioLocations.set(context, context.getUniformLocation(program, 'u_clipRatio'));
+
   setPremultipliedAlpha(context, false);
+  setEnableClip(context, false);
+  setClipRatio(context, [0.0, 0.0]);
 
   // provide texture coordinates for the rectangle.
   const positionBuffer = context.createBuffer();
@@ -187,6 +206,38 @@ export function setPremultipliedAlpha(
 }
 
 /**
+ * Set whether to enable clipping.
+ */
+export function setEnableClip(
+  context: WebGLRenderingContext | WebGL2RenderingContext,
+  enableClip: boolean,
+): void {
+  context.uniform1i(enableClipLocations.get(context), enableClip ? 1 : 0);
+}
+
+/**
+ * Set the clipping ratio (width and height ratio).
+ *
+ * @param clipRatio A vec2 representing the clipping ratio [widthRatio, heightRatio]
+ */
+export function setClipRatio(
+  context: WebGLRenderingContext | WebGL2RenderingContext,
+  clipRatio: [number, number],
+): void {
+  context.uniform2f(clipRatioLocations.get(context), clipRatio[0], clipRatio[1]);
+}
+
+/**
+ * Clear the canvas by removing all pixels.
+ */
+export function clearCanvas(context: WebGLRenderingContext | WebGL2RenderingContext): void {
+  const canvas = context.canvas;
+  context.viewport(0, 0, canvas.width, canvas.height);
+  context.clearColor(0, 0, 0, 0);
+  context.clear(context.COLOR_BUFFER_BIT);
+}
+
+/**
  * Draw a stacked-alpha video frame to a GL context.
  */
 export function drawVideo(
@@ -194,23 +245,20 @@ export function drawVideo(
   video: HTMLVideoElement,
 ): void {
   const canvas = context.canvas;
-  const width = video.videoWidth;
-  const height = Math.floor(video.videoHeight / 2);
 
-  if (canvas.width !== width || canvas.height !== height) {
-    canvas.width = width;
-    canvas.height = height;
-    context.viewport(0, 0, width, height);
+  // draw only use current canvas dimensions
+  context.viewport(0, 0, canvas.width, canvas.height);
+
+  if (video.readyState >= video.HAVE_CURRENT_DATA) {
+    context.texImage2D(
+      context.TEXTURE_2D,
+      0,
+      context.RGBA,
+      context.RGBA,
+      context.UNSIGNED_BYTE,
+      video,
+    );
+
+    context.drawArrays(context.TRIANGLES, 0, 6);
   }
-
-  context.texImage2D(
-    context.TEXTURE_2D,
-    0,
-    context.RGBA,
-    context.RGBA,
-    context.UNSIGNED_BYTE,
-    video,
-  );
-
-  context.drawArrays(context.TRIANGLES, 0, 6);
 }
