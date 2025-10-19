@@ -1,7 +1,10 @@
 node_modules/
 dist/
+lib/
+
 coverage/
 storybook-static/
+
 *.tsbuildinfo
 pnpm-debug.log*
 *storybook.log
