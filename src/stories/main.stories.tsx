@@ -42,22 +42,24 @@ export const KitchenSink = () => {
 
   return (
     <div className="demo">
-      <div>
-        <button
-          onClick={() => {
-            isPlaying ? ref.current?.pause() : ref.current?.play();
-          }}
-        >
-          {isPlaying ? '⏸️' : '▶️'}
-        </button>
-        <button
-          onClick={() => {
-            ref.current?.seek(0);
-            ref.current?.play();
-          }}
-        >
-          ⏪
-        </button>
+      <div className="controls">
+        <div className="playback">
+          <button
+            onClick={() => {
+              isPlaying ? ref.current?.pause() : ref.current?.play();
+            }}
+          >
+            {isPlaying ? '⏸️' : '▶️'}
+          </button>
+          <button
+            onClick={() => {
+              ref.current?.seek(0);
+              ref.current?.play();
+            }}
+          >
+            ⏪
+          </button>
+        </div>
         <label>
           Video
           <select
@@ -81,12 +83,21 @@ export const KitchenSink = () => {
           Pre-multiplied alpha
         </label>
         <label>
+          Custom Size
+          <input
+            type="checkbox"
+            value={customSize ? 'true' : 'false'}
+            onChange={(e) => setCustomSize(e.target.checked)}
+          ></input>
+        </label>
+        <label>
           Object Fit
           <select
             onChange={(e) => {
               setObjectFit(e.target.value as any);
             }}
             value={objectFit}
+            disabled={!customSize}
           >
             <option value={'contain'}>contain</option>
             <option value={'cover'}>cover</option>
@@ -94,34 +105,44 @@ export const KitchenSink = () => {
           </select>
         </label>
       </div>
-      <TransparentVideo
-        ref={ref}
-        loop
-        muted
-        autoPlay
-        objectFit={objectFit}
-        preMultipliedAlpha={preMultipliedAlpha}
-        style={
-          !customSize
-            ? {
-                maxWidth: '600px',
-              }
-            : {
-                width: '100%',
-                height: '100%',
-              }
-        }
-        onPlayStateChange={(isPlaying) => {
-          setIsPlaying(isPlaying);
+      <div
+        style={{
+          width: 600,
+          height: 300,
+          display: customSize ? 'block' : 'contents',
+          overflow: 'hidden',
+          resize: 'both',
         }}
       >
-        {video ? (
-          <TransparentVideoSource
-            src={video}
-            type="video/mp4; codecs=av01.0.08M.08.0.110.01.01.01.1"
-          />
-        ) : null}
-      </TransparentVideo>
+        <TransparentVideo
+          ref={ref}
+          loop
+          muted
+          autoPlay
+          objectFit={objectFit}
+          preMultipliedAlpha={preMultipliedAlpha}
+          style={
+            !customSize
+              ? {
+                  maxWidth: '700px',
+                }
+              : {
+                  width: '100%',
+                  height: '100%',
+                }
+          }
+          onPlayStateChange={(isPlaying) => {
+            setIsPlaying(isPlaying);
+          }}
+        >
+          {video ? (
+            <TransparentVideoSource
+              src={video}
+              type="video/mp4; codecs=av01.0.08M.08.0.110.01.01.01.1"
+            />
+          ) : null}
+        </TransparentVideo>
+      </div>
     </div>
   );
 };
