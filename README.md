@@ -4,7 +4,7 @@
 
 A react component for stacked-alpha video.
 
-The stacked-alpha video rendering technique is based on Jake Archibald's research: [article](https://jakearchibald.com/2024/video-with-transparency/) and his [web component repo](https://github.com/jakearchibald/transparent-video). This approach provides high compression efficiency while preserving excellent visual quality for transparent videos.
+The stacked-alpha video rendering technique is based on Jake Archibald's research: [article](https://jakearchibald.com/2024/video-with-transparency/) and his [web component repo](https://github.com/jakearchibald/stacked-alpha-video). This approach provides high compression efficiency while preserving excellent visual quality for transparent videos.
 
 Enhanced for React.
 
