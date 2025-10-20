@@ -1,5 +1,6 @@
+/* eslint-disable storybook/context-in-play-function */
 import type { Meta } from '@storybook/react-vite';
-import { TransparentVideo, TransparentVideoSource, type TransparentVideoHandle } from '../index';
+import { TransparentVideo, TransparentVideoSource, type TransparentVideoRef } from '../index';
 import { useRef, useState } from 'react';
 
 import demoVideo1 from '../assets/demo-video-1.mp4';
@@ -7,7 +8,7 @@ import demoVideo2 from '../assets/demo-video-2.mp4';
 import demoVideo3 from '../assets/demo-video-3.mp4';
 
 import doc from './main.md?raw';
-import { TransparentVideoHandleTyped } from './typed';
+import { TransparentVideoRefTyped } from './typed';
 
 import './main.css';
 
@@ -15,9 +16,10 @@ const meta = {
   title: 'Transparent Video React',
   component: TransparentVideo,
   subcomponents: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ['TransparentVideoSource']: TransparentVideoSource as any,
-    ['ref of <TransparentVideo />']: TransparentVideoHandleTyped as any,
-    // ['CardTabsTabConfig']: CardTabsTabConfigType as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ['ref of <TransparentVideo />']: TransparentVideoRefTyped as any,
   },
   parameters: {
     layout: 'fullscreen',
@@ -33,7 +35,7 @@ const meta = {
 export default meta;
 
 export const KitchenSink = () => {
-  const ref = useRef<TransparentVideoHandle>(null);
+  const ref = useRef<TransparentVideoRef>(null);
   const [video, setVideo] = useState(demoVideo2);
   const [isPlaying, setIsPlaying] = useState(false);
   const [preMultipliedAlpha, setPreMultipliedAlpha] = useState(false);
@@ -46,7 +48,11 @@ export const KitchenSink = () => {
         <div className="playback">
           <button
             onClick={() => {
-              isPlaying ? ref.current?.pause() : ref.current?.play();
+              if (isPlaying) {
+                ref.current?.pause();
+              } else {
+                ref.current?.play();
+              }
             }}
           >
             {isPlaying ? '⏸️' : '▶️'}
@@ -94,6 +100,7 @@ export const KitchenSink = () => {
           Object Fit
           <select
             onChange={(e) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               setObjectFit(e.target.value as any);
             }}
             value={objectFit}
