@@ -89,13 +89,14 @@ export const KitchenSink = () => {
           Pre-multiplied alpha
         </label>
         <label>
-          Custom Size
           <input
             type="checkbox"
             value={customSize ? 'true' : 'false'}
             onChange={(e) => setCustomSize(e.target.checked)}
           ></input>
+          Custom Size
         </label>
+        {customSize && <desc className="desc">Drag the bottom right corner to resize</desc>}
         <label>
           Object Fit
           <select
@@ -113,6 +114,7 @@ export const KitchenSink = () => {
         </label>
       </div>
       <div
+        className="resizer"
         style={{
           width: 600,
           height: 300,
