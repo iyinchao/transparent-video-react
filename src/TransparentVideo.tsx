@@ -30,7 +30,7 @@ import { useDevicePixelRatio } from './useDevicePixelRatio';
  * Ref handle exposed by the TransparentVideo component.
  * Use this to control the video playback and access the underlying elements.
  */
-export interface TransparentVideoHandle {
+export interface TransparentVideoRef {
   /**
    * Play the video.
    */
@@ -46,6 +46,11 @@ export interface TransparentVideoHandle {
    * @param time - The time in seconds to seek to.
    */
   seek: (time: number) => void;
+
+  /**
+   * Force draw the video to the canvas.
+   */
+  forceUpdate: (resize?: boolean) => void;
 
   /**
    * Whether the video is currently playing.
@@ -201,7 +206,7 @@ export interface TransparentVideoProps {
  * import { TransparentVideo, TransparentVideoSource } from 'transparent-video-react';
  *
  * const MyComponent = () => {
- *   const videoRef = useRef<TransparentVideoHandle>(null);
+ *   const videoRef = useRef<TransparentVideoRef>(null);
  *
  *   return (
  *     <>
@@ -221,10 +226,10 @@ export interface TransparentVideoProps {
  * };
  * ```
  *
- * @see {@link TransparentVideoHandle} for available ref methods
+ * @see {@link TransparentVideoRef} for available ref methods
  * @see {@link TransparentVideoProps} for available props
  */
-export const TransparentVideo = forwardRef<TransparentVideoHandle, TransparentVideoProps>(
+export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideoProps>(
   (
     {
       className,
@@ -281,7 +286,7 @@ export const TransparentVideo = forwardRef<TransparentVideoHandle, TransparentVi
     });
     stateRef.current.onPlayStateChange = onPlayStateChange;
 
-    useImperativeHandle<TransparentVideoHandle, TransparentVideoHandle>(ref, () => ({
+    useImperativeHandle<TransparentVideoRef, TransparentVideoRef>(ref, () => ({
       play: () => {
         videoRef.current?.play();
       },
@@ -293,6 +298,16 @@ export const TransparentVideo = forwardRef<TransparentVideoHandle, TransparentVi
           return;
         }
         videoRef.current.currentTime = time;
+      },
+      forceUpdate: (resize = false) => {
+        if (resize) {
+          stateRef.current.handleCanvasResize?.(true);
+          return;
+        }
+        if (!stateRef.current.context || !stateRef.current.canvasResizeValid || !videoRef.current) {
+          return;
+        }
+        drawVideo(stateRef.current.context, videoRef.current);
       },
       get isPlaying() {
         return stateRef.current.videoIsPlaying;
@@ -424,7 +439,7 @@ export const TransparentVideo = forwardRef<TransparentVideoHandle, TransparentVi
           }
 
           if (objectFit === 'fill') {
-            let scale = { w: 1, h: 1 };
+            const scale = { w: 1, h: 1 };
             if (rootSizePx.w > videoSize.w) {
               canvasRef.current.width = videoSize.w;
               scale.w = rootSizePx.w / videoSize.w / dpr;
@@ -461,8 +476,8 @@ export const TransparentVideo = forwardRef<TransparentVideoHandle, TransparentVi
             //   setEnableClip(stateRef.current.context, false);
             // }
           } else if (objectFit === 'contain') {
-            let scale = { w: 1 / dpr, h: 1 / dpr };
-            let transform = { x: 0, y: 0 };
+            const scale = { w: 1 / dpr, h: 1 / dpr };
+            const transform = { x: 0, y: 0 };
             const rVideo = videoSize.w / videoSize.h;
             const rRoot = rootSizePx.w / rootSizePx.h;
             if (rVideo > rRoot) {
@@ -496,7 +511,7 @@ export const TransparentVideo = forwardRef<TransparentVideoHandle, TransparentVi
             const scale = { w: 1 / dpr, h: 1 / dpr };
             const clipRatio = [0, 0] as [number, number];
 
-            let videoRenderPx = { w: videoSize.w, h: videoSize.h };
+            const videoRenderPx = { w: videoSize.w, h: videoSize.h };
             if (rVideo >= rRoot) {
               videoRenderPx.w = (rRoot / rVideo) * videoRenderPx.w;
 
@@ -621,7 +636,7 @@ export const TransparentVideo = forwardRef<TransparentVideoHandle, TransparentVi
 
     return (
       <div
-        className={['__transparent-video__', className].filter(Boolean as any).join(' ')}
+        className={['__transparent-video__', className].filter(Boolean).join(' ')}
         style={style}
         ref={rootRef}
       >
@@ -632,6 +647,7 @@ export const TransparentVideo = forwardRef<TransparentVideoHandle, TransparentVi
             ...canvasProps?.style,
           }}
         />
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
         <video
           ref={videoRef}
           {...videoProps}
@@ -696,3 +712,4 @@ export const TransparentVideo = forwardRef<TransparentVideoHandle, TransparentVi
     );
   },
 );
+TransparentVideo.displayName = 'TransparentVideo';

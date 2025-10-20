@@ -56,18 +56,19 @@ import { TransparentVideo, TransparentVideoSource } from 'transparent-video-reac
 | `src`  | `string` |         | URL of the video source                    |
 | `type` | `string` |         | MIME type of the video (e.g., `video/mp4`) |
 
-## Ref Handle
+## Ref API (`TransparentVideoRef`)
 
-The `TransparentVideo` component exposes a ref handle with the following methods and properties:
+The `TransparentVideo` component exposes a `TransparentVideoRef` with the following methods and properties:
 
-| Name                 | Type                              | Description                            |
-| -------------------- | --------------------------------- | -------------------------------------- |
-| `play()`             | `() => void`                      | Play the video                         |
-| `pause()`            | `() => void`                      | Pause the video                        |
-| `seek(time)`         | `(time: number) => void`          | Seek to a specific time (in seconds)   |
-| `isPlaying`          | `boolean`                         | Whether the video is currently playing |
-| `getVideoElement()`  | `() => HTMLVideoElement \| null`  | Get the underlying video element       |
-| `getCanvasElement()` | `() => HTMLCanvasElement \| null` | Get the underlying canvas element      |
+| Name                  | Type                              | Description                                                                                     |
+| --------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `play()`              | `() => void`                      | Play the video                                                                                  |
+| `pause()`             | `() => void`                      | Pause the video                                                                                 |
+| `seek(time)`          | `(time: number) => void`          | Seek to a specific time (in seconds)                                                            |
+| `forceUpdate(resize)` | `(resize?: boolean) => void`      | Force draw the current frame. When `resize` is `true`, the canvas layout is recalculated first. |
+| `isPlaying`           | `boolean`                         | Whether the video is currently playing                                                          |
+| `getVideoElement()`   | `() => HTMLVideoElement \| null`  | Get the underlying video element                                                                |
+| `getCanvasElement()`  | `() => HTMLCanvasElement \| null` | Get the underlying canvas element                                                               |
 
 ## Alpha Video Generation
 

@@ -1,5 +1,5 @@
-import { type TransparentVideoHandle } from '../index';
+import { type TransparentVideoRef } from '../index';
 
-export const TransparentVideoHandleTyped = (props: TransparentVideoHandle) => {
+export const TransparentVideoRefTyped = (props: TransparentVideoRef) => {
   return <div>typed</div>;
 };
