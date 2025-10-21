@@ -1,3 +1,9 @@
+## [1.2.3](https://github.com/iyinchao/transparent-video-react/compare/v1.2.2...v1.2.3) (2025-10-21)
+
+### 🐛 Bug Fixes
+
+* disable simulate lost webgl context ([01ea709](https://github.com/iyinchao/transparent-video-react/commit/01ea709894692f194ec0c94abbc8fabd86eb2f77))
+
 ## [1.2.2](https://github.com/iyinchao/transparent-video-react/compare/v1.2.1...v1.2.2) (2025-10-21)
 
 ### 🐛 Bug Fixes
