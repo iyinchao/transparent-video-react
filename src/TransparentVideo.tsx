@@ -642,16 +642,34 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
         ref={rootRef}
       >
         <canvas
-          ref={canvasRef}
           {...canvasProps}
+          ref={(ref) => {
+            canvasRef.current = ref;
+            if (canvasProps?.ref) {
+              if (typeof canvasProps.ref === 'function') {
+                canvasProps.ref(ref);
+              } else {
+                canvasProps.ref.current = ref;
+              }
+            }
+          }}
           style={{
             ...canvasProps?.style,
           }}
         />
         {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
         <video
-          ref={videoRef}
           {...videoProps}
+          ref={(ref) => {
+            videoRef.current = ref;
+            if (videoProps?.ref) {
+              if (typeof videoProps.ref === 'function') {
+                videoProps.ref(ref);
+              } else {
+                videoProps.ref.current = ref;
+              }
+            }
+          }}
           loop={loop}
           autoPlay={autoPlay}
           muted={muted}
