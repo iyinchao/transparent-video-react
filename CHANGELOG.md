@@ -1,3 +1,13 @@
+## [1.2.0](https://github.com/iyinchao/transparent-video-react/compare/v1.1.0...v1.2.0) (2025-10-21)
+
+### ✨ Features
+
+* enforce first still frame rendering ([1d9f142](https://github.com/iyinchao/transparent-video-react/commit/1d9f142f27278f38162742dc2389675970c8d131))
+
+### 📚 Documentation
+
+* refine docs ([6159d81](https://github.com/iyinchao/transparent-video-react/commit/6159d810b3ccfc7576bbb8e2ab9967509d7046ee))
+
 ## [1.1.0](https://github.com/iyinchao/transparent-video-react/compare/v1.0.0...v1.1.0) (2025-10-20)
 
 ### ✨ Features
