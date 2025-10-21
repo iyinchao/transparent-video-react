@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/iyinchao/transparent-video-react/compare/v1.2.0...v1.2.1) (2025-10-21)
+
+### 🐛 Bug Fixes
+
+* first frame enhance rendering timing ([2922c37](https://github.com/iyinchao/transparent-video-react/commit/2922c376486eeadd2630ecda4da2e540bc5d501e))
+
 ## [1.2.0](https://github.com/iyinchao/transparent-video-react/compare/v1.1.0...v1.2.0) (2025-10-21)
 
 ### ✨ Features
