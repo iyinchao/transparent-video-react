@@ -61,7 +61,8 @@ function loadShader(
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
     const error = gl.getShaderInfoLog(shader);
     gl.deleteShader(shader);
-    throw Error(error || 'unknown error');
+    const elErrorCode = gl.getError();
+    throw Error(error || `unknown error, gl error code: ${elErrorCode}`);
   }
 
   return shader;
@@ -190,7 +191,7 @@ export function destroyGLContext(gl: WebGLRenderingContext | WebGL2RenderingCont
   resourcesMap.delete(gl);
 
   // Try to lose context, only available in some platforms
-  gl.getExtension('WEBGL_lose_context')?.loseContext();
+  // gl.getExtension('WEBGL_lose_context')?.loseContext();
 }
 
 /**
