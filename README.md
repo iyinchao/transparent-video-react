@@ -103,6 +103,8 @@ INPUT="in.mov" OUTPUT="hevc.mp4" CRF=30 PRESET="veryslow" bash -c 'ffmpeg -y -i 
 
 - [ ] Support `object-position`
 - [ ] Anti-aliasing
+- [ ] Video poster
+- [ ] Accessibility
 
 **Known issues**
 
