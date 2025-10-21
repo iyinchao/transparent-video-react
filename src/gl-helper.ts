@@ -243,13 +243,14 @@ export function clearCanvas(context: WebGLRenderingContext | WebGL2RenderingCont
 export function drawVideo(
   context: WebGLRenderingContext | WebGL2RenderingContext,
   video: HTMLVideoElement,
+  checkReadyState = true,
 ): void {
   const canvas = context.canvas;
 
   // draw only use current canvas dimensions
   context.viewport(0, 0, canvas.width, canvas.height);
 
-  if (video.readyState >= video.HAVE_CURRENT_DATA) {
+  if (checkReadyState && video.readyState >= video.HAVE_CURRENT_DATA) {
     context.texImage2D(
       context.TEXTURE_2D,
       0,

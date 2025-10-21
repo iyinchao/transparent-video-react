@@ -261,7 +261,7 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
       canvasResizeValid: boolean;
       //
       context: WebGLRenderingContext | WebGL2RenderingContext | null;
-      handleCanvasResize?: (sync?: boolean) => void;
+      handleCanvasResize?: (sync?: boolean, noDraw?: boolean) => void;
       handlePlayStateChange?: () => void;
       //
       objectFit: typeof objectFit;
@@ -301,13 +301,12 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
       },
       forceUpdate: (resize = false) => {
         if (resize) {
-          stateRef.current.handleCanvasResize?.(true);
+          stateRef.current.handleCanvasResize?.(true, true);
+        }
+        if (!stateRef.current.context || !videoRef.current) {
           return;
         }
-        if (!stateRef.current.context || !stateRef.current.canvasResizeValid || !videoRef.current) {
-          return;
-        }
-        drawVideo(stateRef.current.context, videoRef.current);
+        drawVideo(stateRef.current.context, videoRef.current, false);
       },
       get isPlaying() {
         return stateRef.current.videoIsPlaying;
@@ -349,14 +348,27 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
 
       // If initial state is not playing, wait for the first frame ready and draw
       let drawFirstFrameTimeout: ReturnType<typeof setTimeout> | null = null;
+      let drawFirstFrameCallbackId: number | null = null;
       const onLoadedData = () => {
         if (stateRef.current.videoEverPlayed) {
           return;
         }
+
         drawFirstFrameTimeout = setTimeout(() => {
           drawFirstFrameTimeout = null;
           if (stateRef.current.videoEverPlayed || !stateRef.current.context) {
             return;
+          }
+
+          // enhance
+          if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+            drawFirstFrameCallbackId = video.requestVideoFrameCallback(() => {
+              drawFirstFrameCallbackId = null;
+              if (!stateRef.current.context) {
+                return;
+              }
+              drawVideo(stateRef.current.context, video);
+            });
           }
           // draw first frame
           drawVideo(stateRef.current.context, video);
@@ -382,6 +394,10 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
             if (drawFirstFrameTimeout) {
               clearTimeout(drawFirstFrameTimeout);
               drawFirstFrameTimeout = null;
+            }
+            if (drawFirstFrameCallbackId) {
+              video.cancelVideoFrameCallback(drawFirstFrameCallbackId);
+              drawFirstFrameCallbackId = null;
             }
 
             const onFrame = () => {
@@ -410,7 +426,7 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
 
       let isPendingResize = false;
       let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
-      stateRef.current.handleCanvasResize = (sync?: boolean) => {
+      stateRef.current.handleCanvasResize = (sync: boolean = false, noDraw: boolean = false) => {
         if (isPendingResize && !sync) {
           return;
         }
@@ -458,23 +474,6 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
             canvasRef.current.style.transformOrigin = 'left top';
 
             setEnableClip(stateRef.current.context, false);
-
-            // // modify gl render uniforms
-            // if (objectFit === 'cover') {
-            //   let clipRatio = [0, 0] as [number, number];
-            //   const rVideo = videoSize.w / videoSize.h;
-            //   const rRoot = rootSizePx.w / rootSizePx.h;
-
-            //   if (rVideo > rRoot) {
-            //     clipRatio = [(rVideo - rRoot) / 2, 0];
-            //   } else {
-            //     // clipRatio = []
-            //   }
-            //   setEnableClip(stateRef.current.context, true);
-            //   setClipRatio(stateRef.current.context, clipRatio);
-            // } else {
-            //   setEnableClip(stateRef.current.context, false);
-            // }
           } else if (objectFit === 'contain') {
             const scale = { w: 1 / dpr, h: 1 / dpr };
             const transform = { x: 0, y: 0 };
@@ -549,7 +548,9 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
           }
 
           stateRef.current.canvasResizeValid = true;
-          drawVideo(stateRef.current.context, video);
+          if (!noDraw) {
+            drawVideo(stateRef.current.context, video);
+          }
         };
 
         if (sync) {
