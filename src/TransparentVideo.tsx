@@ -354,21 +354,21 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
           return;
         }
 
+        // enhance
+        if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+          drawFirstFrameCallbackId = video.requestVideoFrameCallback(() => {
+            drawFirstFrameCallbackId = null;
+            if (!stateRef.current.context) {
+              return;
+            }
+            drawVideo(stateRef.current.context, video);
+          });
+        }
+
         drawFirstFrameTimeout = setTimeout(() => {
           drawFirstFrameTimeout = null;
           if (stateRef.current.videoEverPlayed || !stateRef.current.context) {
             return;
-          }
-
-          // enhance
-          if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
-            drawFirstFrameCallbackId = video.requestVideoFrameCallback(() => {
-              drawFirstFrameCallbackId = null;
-              if (!stateRef.current.context) {
-                return;
-              }
-              drawVideo(stateRef.current.context, video);
-            });
           }
           // draw first frame
           drawVideo(stateRef.current.context, video);
