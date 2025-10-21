@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/iyinchao/transparent-video-react/compare/v1.2.3...v1.3.0) (2025-10-21)
+
+### ✨ Features
+
+* support ref using `canvasProps` / `videoProps` ([4b05517](https://github.com/iyinchao/transparent-video-react/commit/4b05517a8865399af3eab99770af714dda1ada71))
+
 ## [1.2.3](https://github.com/iyinchao/transparent-video-react/compare/v1.2.2...v1.2.3) (2025-10-21)
 
 ### 🐛 Bug Fixes
