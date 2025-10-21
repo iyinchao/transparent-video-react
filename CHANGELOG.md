@@ -1,3 +1,9 @@
+## [1.2.2](https://github.com/iyinchao/transparent-video-react/compare/v1.2.1...v1.2.2) (2025-10-21)
+
+### 🐛 Bug Fixes
+
+* video rendering readystate check logic ([789f7f9](https://github.com/iyinchao/transparent-video-react/commit/789f7f9b7f546ec632402d422e42902fd37ba52e))
+
 ## [1.2.1](https://github.com/iyinchao/transparent-video-react/compare/v1.2.0...v1.2.1) (2025-10-21)
 
 ### 🐛 Bug Fixes
