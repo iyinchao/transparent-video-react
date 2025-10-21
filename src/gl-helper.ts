@@ -250,7 +250,7 @@ export function drawVideo(
   // draw only use current canvas dimensions
   context.viewport(0, 0, canvas.width, canvas.height);
 
-  if (checkReadyState && video.readyState >= video.HAVE_CURRENT_DATA) {
+  if (!checkReadyState || video.readyState >= video.HAVE_CURRENT_DATA) {
     context.texImage2D(
       context.TEXTURE_2D,
       0,
