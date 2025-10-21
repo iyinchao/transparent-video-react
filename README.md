@@ -2,6 +2,10 @@
 
 > 🚧 Work in progress, use with caution in production.
 
+[![Release workflow](https://img.shields.io/github/actions/workflow/status/iyinchao/transparent-video-react/release.yml?label=release&style=flat-square)](https://github.com/iyinchao/transparent-video-react/actions/workflows/release.yml)
+[![NPM Version](https://img.shields.io/npm/v/transparent-video-react?style=flat-square)](https://www.npmjs.com/package/transparent-video-react)
+[![License](https://img.shields.io/github/license/iyinchao/transparent-video-react?style=flat-square)](https://github.com/iyinchao/transparent-video-react/blob/main/LICENSE)
+
 A react component for stacked-alpha video.
 
 The stacked-alpha video rendering technique is based on Jake Archibald's research: [article](https://jakearchibald.com/2024/video-with-transparency/) and his [web component repo](https://github.com/jakearchibald/stacked-alpha-video). This approach provides high compression efficiency while preserving excellent visual quality for transparent videos.
