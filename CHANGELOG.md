@@ -1,3 +1,17 @@
+## [1.4.0](https://github.com/iyinchao/transparent-video-react/compare/v1.3.0...v1.4.0) (2025-11-02)
+
+### ✨ Features
+
+* anti-aliasing use GL.LINEAR ([6f45e58](https://github.com/iyinchao/transparent-video-react/commit/6f45e58895644dcc31e0a85f9d04cbc8b279ab4a))
+
+### ♻️ Refactoring
+
+* split main component file and type ([40a684b](https://github.com/iyinchao/transparent-video-react/commit/40a684be0d47cd3ff14277cbf0c3ef839609b7a9))
+
+### 📚 Documentation
+
+* add badges ([99695be](https://github.com/iyinchao/transparent-video-react/commit/99695beeeaf8746f8ae4d0e38e576388a9f32582))
+
 ## [1.3.0](https://github.com/iyinchao/transparent-video-react/compare/v1.2.3...v1.3.0) (2025-10-21)
 
 ### ✨ Features
