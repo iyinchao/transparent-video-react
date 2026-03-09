@@ -1,6 +1,24 @@
 import { type CSSProperties, type ReactElement, type SourceHTMLAttributes } from 'react';
 
 /**
+ * The type of WebGL context lifecycle event.
+ * - `'creation-failed'` — WebGL context could not be created (or restored)
+ * - `'context-lost'` — WebGL context was lost at runtime
+ * - `'context-restored'` — WebGL context was successfully restored after being lost
+ */
+export type WebGLContextEventType = 'creation-failed' | 'context-lost' | 'context-restored';
+
+/**
+ * Event object passed to the `onContextEvent` callback.
+ */
+export interface WebGLContextEvent {
+  /** The type of context lifecycle event. */
+  type: WebGLContextEventType;
+  /** A human-readable description of the event. */
+  message: string;
+}
+
+/**
  * Props for the TransparentVideoSource component.
  * Extends standard HTML source element attributes.
  */
@@ -62,6 +80,12 @@ export interface TransparentVideoRef {
    * @returns The canvas element, or null if not yet mounted.
    */
   getCanvasElement: () => HTMLCanvasElement | null;
+
+  /**
+   * Whether the WebGL context is available and usable.
+   * `false` if context creation failed or the context is currently lost.
+   */
+  readonly glAvailable: boolean;
 }
 
 /**
@@ -139,4 +163,14 @@ export interface TransparentVideoProps {
    * @param isPlaying - Whether the video is currently playing.
    */
   onPlayStateChange?: (isPlaying: boolean) => void;
+
+  /**
+   * Callback fired when a WebGL context lifecycle event occurs.
+   *
+   * Use this to implement degradation UI when the GL context is unavailable,
+   * or to react when the context is restored.
+   *
+   * @param event - The context event details.
+   */
+  onContextEvent?: (event: WebGLContextEvent) => void;
 }

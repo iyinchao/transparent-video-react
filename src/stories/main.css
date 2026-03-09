@@ -7,8 +7,19 @@
   height: 100%;
   background-color: #ffffff;
   opacity: 0.1;
-  background-image: repeating-linear-gradient(45deg, #000000 25%, transparent 25%, transparent 75%, #000000 75%, #000000), repeating-linear-gradient(45deg, #000000 25%, #ffffff 25%, #ffffff 75%, #000000 75%, #000000);
-  background-position: 0 0, 21px 21px;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      #000000 25%,
+      transparent 25%,
+      transparent 75%,
+      #000000 75%,
+      #000000
+    ),
+    repeating-linear-gradient(45deg, #000000 25%, #ffffff 25%, #ffffff 75%, #000000 75%, #000000);
+  background-position:
+    0 0,
+    21px 21px;
   background-size: 42px 42px;
   z-index: -1;
 }
@@ -23,7 +34,7 @@
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  width: 200px;
+  width: 260px;
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 0.5em;
@@ -52,15 +63,21 @@
 }
 
 .resizer::-webkit-resizer {
-  background: linear-gradient(135deg,
-      /* transparent 30%, black 30%,
-      black 40%, transparent 40%, */
-      transparent 50%, black 50%,
-      black 60%, transparent 60%,
-      transparent 70%, black 70%,
-      black 80%, transparent 80%,
-      transparent 90%, black 90%,
-      black 100%);
+  background: linear-gradient(
+    135deg,
+    /* transparent 30%, black 30%,
+      black 40%, transparent 40%, */ transparent 50%,
+    black 50%,
+    black 60%,
+    transparent 60%,
+    transparent 70%,
+    black 70%,
+    black 80%,
+    transparent 80%,
+    transparent 90%,
+    black 90%,
+    black 100%
+  );
 }
 
 .desc {
@@ -68,4 +85,67 @@
   color: gray;
   margin-top: -0.5rem;
   margin-left: 0.2rem;
+}
+
+.controls-divider {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.15);
+  margin: 0;
+}
+
+.gl-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.gl-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #999;
+}
+
+.gl-indicator--available {
+  background: #22c55e;
+}
+
+.gl-indicator--lost {
+  background: #f59e0b;
+}
+
+.gl-indicator--creation-failed {
+  background: #ef4444;
+}
+
+.gl-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.gl-controls button {
+  font-size: 12px;
+  padding: 0.3em 0.5em;
+  cursor: pointer;
+}
+
+.gl-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.context-log {
+  font-size: 11px;
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 0.3em;
+  padding: 0.4em;
+  max-height: 150px;
+  overflow-y: auto;
+  line-height: 1.5;
+  word-break: break-all;
 }

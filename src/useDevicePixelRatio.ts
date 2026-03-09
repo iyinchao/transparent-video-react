@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 type updateCb = (dpr: number) => void;
 const cbList = new Set<updateCb>();
@@ -50,12 +50,12 @@ export function useDevicePixelRatio() {
     };
   }, []);
 
-  const observe = (cb: updateCb) => {
+  const observe = useCallback((cb: updateCb) => {
     listeners.current.add(cb);
     return () => {
       listeners.current.delete(cb);
     };
-  };
+  }, []);
 
   return {
     observe,

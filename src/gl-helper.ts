@@ -94,6 +94,12 @@ const resourcesMap = new WeakMap<WebGLRenderingContext | WebGL2RenderingContext,
 const premultipliedAlphaLocations = new WeakMap();
 const enableClipLocations = new WeakMap();
 const clipRatioLocations = new WeakMap();
+const lostContexts = new WeakSet<WebGLRenderingContext | WebGL2RenderingContext>();
+
+export function markContextLost(gl: WebGLRenderingContext | WebGL2RenderingContext) {
+  lostContexts.add(gl);
+  resourcesMap.delete(gl);
+}
 
 /**
  * Get a GL context for a canvas.
@@ -174,6 +180,10 @@ export function setupGLContext(canvas: HTMLCanvasElement | OffscreenCanvas) {
 }
 
 export function destroyGLContext(gl: WebGLRenderingContext | WebGL2RenderingContext) {
+  if (lostContexts.has(gl)) {
+    lostContexts.delete(gl);
+    return;
+  }
   const resources = resourcesMap.get(gl);
   if (!resources) return;
 

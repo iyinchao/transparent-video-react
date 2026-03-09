@@ -1,7 +1,12 @@
 /* eslint-disable storybook/context-in-play-function */
 import type { Meta } from '@storybook/react-vite';
-import { TransparentVideo, TransparentVideoSource, type TransparentVideoRef } from '../index';
-import { useRef, useState } from 'react';
+import {
+  TransparentVideo,
+  TransparentVideoSource,
+  type TransparentVideoRef,
+  type WebGLContextEvent,
+} from '../index';
+import { useEffect, useRef, useState } from 'react';
 
 import demoVideo1 from '../assets/demo-video-1.mp4';
 import demoVideo2 from '../assets/demo-video-2.mp4';
@@ -41,6 +46,76 @@ export const KitchenSink = () => {
   const [preMultipliedAlpha, setPreMultipliedAlpha] = useState(false);
   const [objectFit, setObjectFit] = useState<'contain' | 'cover' | 'fill'>('cover');
   const [customSize, setCustomSize] = useState<boolean>(false);
+
+  // Context event state
+  const [glStatus, setGlStatus] = useState<'available' | 'lost' | 'creation-failed'>('available');
+  const [contextLog, setContextLog] = useState<string[]>([]);
+  const extRef = useRef<WEBGL_lose_context | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  const originalGetContext = useRef<Function | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const addLog = (msg: string) => {
+    setContextLog((prev) => [...prev.slice(-19), `[${new Date().toLocaleTimeString()}] ${msg}`]);
+  };
+
+  const handleContextEvent = (event: WebGLContextEvent) => {
+    addLog(`${event.type}: ${event.message}`);
+    if (event.type === 'context-lost') setGlStatus('lost');
+    else if (event.type === 'context-restored') setGlStatus('available');
+    else if (event.type === 'creation-failed') setGlStatus('creation-failed');
+  };
+
+  const handleLoseContext = () => {
+    const canvas = ref.current?.getCanvasElement();
+    if (!canvas) return;
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    if (!gl) return;
+    const ext = gl.getExtension('WEBGL_lose_context');
+    extRef.current = ext;
+    ext?.loseContext();
+    addLog('Manually triggered loseContext()');
+  };
+
+  const handleRestoreContext = () => {
+    extRef.current?.restoreContext();
+    addLog('Manually triggered restoreContext()');
+  };
+
+  const handleDisableContext = () => {
+    originalGetContext.current = HTMLCanvasElement.prototype.getContext;
+    // simulate context creation fail
+    HTMLCanvasElement.prototype.getContext = function (...args) {
+      return null;
+    };
+    setRefreshKey((v) => v + 1);
+    addLog('Manually test disable context creation.');
+  };
+
+  const handleEnableContext = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    HTMLCanvasElement.prototype.getContext = originalGetContext.current as any;
+    setRefreshKey((v) => v + 1);
+
+    addLog('Manually test enable context creation.');
+
+    setTimeout(() => {
+      const canvas = ref.current?.getCanvasElement();
+      if (!canvas) return;
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+      if (gl?.isContextLost()) {
+        setGlStatus('lost');
+      } else {
+        setGlStatus('available');
+      }
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      extRef.current = null;
+    };
+  }, []);
 
   return (
     <div className="demo">
@@ -112,6 +187,31 @@ export const KitchenSink = () => {
             <option value={'fill'}>fill</option>
           </select>
         </label>
+        <hr className="controls-divider" />
+        <div className="gl-status">
+          GL Status: <span className={`gl-indicator gl-indicator--${glStatus}`} /> {glStatus}
+        </div>
+        <div className="gl-controls">
+          <button onClick={handleLoseContext} disabled={glStatus !== 'available'}>
+            Context Lost
+          </button>
+          <button onClick={handleRestoreContext} disabled={glStatus !== 'lost'}>
+            Context Restore
+          </button>
+          <button onClick={handleDisableContext} disabled={glStatus === 'creation-failed'}>
+            Disable Context
+          </button>
+          <button onClick={handleEnableContext} disabled={glStatus !== 'creation-failed'}>
+            Enable Context
+          </button>
+        </div>
+        {contextLog.length > 0 && (
+          <div className="context-log">
+            {contextLog.map((entry, i) => (
+              <div key={i}>{entry}</div>
+            ))}
+          </div>
+        )}
       </div>
       <div
         className="resizer"
@@ -143,6 +243,8 @@ export const KitchenSink = () => {
           onPlayStateChange={(isPlaying) => {
             setIsPlaying(isPlaying);
           }}
+          onContextEvent={handleContextEvent}
+          key={refreshKey}
         >
           {video ? (
             <TransparentVideoSource
