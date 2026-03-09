@@ -1,3 +1,9 @@
+## [1.5.1](https://github.com/iyinchao/transparent-video-react/compare/v1.5.0...v1.5.1) (2026-03-09)
+
+### 🐛 Bug Fixes
+
+* trigger patch release after trusted publishing setup ([f242e8d](https://github.com/iyinchao/transparent-video-react/commit/f242e8d9b97f8a390e009d586d27e355a270c7c0))
+
 ## [1.5.0](https://github.com/iyinchao/transparent-video-react/compare/v1.4.0...v1.5.0) (2026-03-09)
 
 ### ✨ Features
