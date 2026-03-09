@@ -1,3 +1,9 @@
+## [1.5.0](https://github.com/iyinchao/transparent-video-react/compare/v1.4.0...v1.5.0) (2026-03-09)
+
+### ✨ Features
+
+* add WebGL context lifecycle handling ([3138903](https://github.com/iyinchao/transparent-video-react/commit/3138903467e2af7af89e49c0f954042685df36f8))
+
 ## [1.4.0](https://github.com/iyinchao/transparent-video-react/compare/v1.3.0...v1.4.0) (2025-11-02)
 
 ### ✨ Features
