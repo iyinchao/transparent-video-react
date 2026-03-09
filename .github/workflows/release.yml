@@ -29,6 +29,14 @@ jobs:
         with:
           node-version: '22.14.0'
 
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@latest
+
+      - name: Show Node and npm versions
+        run: |
+          node -v
+          npm -v
+
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
