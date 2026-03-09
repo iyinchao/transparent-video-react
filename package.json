@@ -5,7 +5,7 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iyinchao/transparent-video-react.git"
+    "url": "git+https://github.com/iyinchao/transparent-video-react.git"
   },
   "main": "lib/transparent-video-react.cjs",
   "module": "lib/transparent-video-react.mjs",
