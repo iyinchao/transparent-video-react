@@ -16,6 +16,7 @@ import {
   setEnableClip,
   setClipRatio,
   clearCanvas,
+  markContextLost,
 } from './gl-helper';
 import { videoIsPlaying } from './utils';
 
@@ -105,6 +106,7 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
       videoProps,
       children,
       onPlayStateChange,
+      onContextEvent,
     },
     ref,
   ) => {
@@ -122,6 +124,7 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
       canvasResizeValid: boolean;
       //
       context: WebGLRenderingContext | WebGL2RenderingContext | null;
+      glAvailable: boolean;
       handleCanvasResize?: (sync?: boolean, noDraw?: boolean) => void;
       handlePlayStateChange?: () => void;
       //
@@ -129,6 +132,7 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
       preMultipliedAlpha: typeof preMultipliedAlpha;
       autoPlay: typeof autoPlay | null;
       onPlayStateChange: typeof onPlayStateChange;
+      onContextEvent: typeof onContextEvent;
     }>({
       lastVideoSrc: '',
       videoIsPlaying: false,
@@ -139,13 +143,16 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
       canvasResizeValid: false,
       //
       context: null,
+      glAvailable: false,
       //
       objectFit,
       preMultipliedAlpha,
       autoPlay: null,
       onPlayStateChange,
+      onContextEvent,
     });
     stateRef.current.onPlayStateChange = onPlayStateChange;
+    stateRef.current.onContextEvent = onContextEvent;
 
     useImperativeHandle<TransparentVideoRef, TransparentVideoRef>(ref, () => ({
       play: () => {
@@ -164,13 +171,16 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
         if (resize) {
           stateRef.current.handleCanvasResize?.(true, true);
         }
-        if (!stateRef.current.context || !videoRef.current) {
+        if (!stateRef.current.context || !stateRef.current.glAvailable || !videoRef.current) {
           return;
         }
         drawVideo(stateRef.current.context, videoRef.current, false);
       },
       get isPlaying() {
         return stateRef.current.videoIsPlaying;
+      },
+      get glAvailable() {
+        return stateRef.current.glAvailable;
       },
       getVideoElement: () => videoRef.current,
       getCanvasElement: () => canvasRef.current,
@@ -188,9 +198,67 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
       const video = videoRef.current;
 
       if (!stateRef.current.context) {
-        stateRef.current.context = setupGLContext(canvas);
-        setPremultipliedAlpha(stateRef.current.context, stateRef.current.preMultipliedAlpha);
+        try {
+          stateRef.current.context = setupGLContext(canvas);
+          stateRef.current.glAvailable = true;
+        } catch (e) {
+          stateRef.current.glAvailable = false;
+          stateRef.current.onContextEvent?.({
+            type: 'creation-failed',
+            message: e instanceof Error ? e.message : String(e),
+          });
+          return;
+        }
       }
+
+      setPremultipliedAlpha(stateRef.current.context, stateRef.current.preMultipliedAlpha);
+
+      // Render loop frame handle — declared early so context lost handler can cancel it
+      let raf: number = 0;
+
+      // WebGL context lost/restored handlers
+      const onContextLost = (e: Event) => {
+        e.preventDefault();
+        stateRef.current.glAvailable = false;
+        cancelAnimationFrame(raf);
+        if (stateRef.current.context) {
+          markContextLost(stateRef.current.context);
+        }
+        stateRef.current.onContextEvent?.({
+          type: 'context-lost',
+          message: 'WebGL context lost',
+        });
+      };
+
+      const onContextRestored = () => {
+        try {
+          if (stateRef.current.context) {
+            destroyGLContext(stateRef.current.context);
+          }
+          stateRef.current.context = setupGLContext(canvas);
+          stateRef.current.glAvailable = true;
+          setPremultipliedAlpha(stateRef.current.context, stateRef.current.preMultipliedAlpha);
+
+          stateRef.current.handleCanvasResize?.(true);
+          if (stateRef.current.videoIsPlaying) {
+            stateRef.current.handlePlayStateChange?.();
+          }
+
+          stateRef.current.onContextEvent?.({
+            type: 'context-restored',
+            message: 'WebGL context restored',
+          });
+        } catch (e) {
+          stateRef.current.glAvailable = false;
+          stateRef.current.onContextEvent?.({
+            type: 'creation-failed',
+            message: `Failed to restore: ${e instanceof Error ? e.message : String(e)}`,
+          });
+        }
+      };
+
+      canvas.addEventListener('webglcontextlost', onContextLost);
+      canvas.addEventListener('webglcontextrestored', onContextRestored);
 
       const videoEvents = ['playing', 'stalled', 'emptied', 'ended', 'pause'] as const;
       const onVideoEvents = (e: Event) => {
@@ -219,7 +287,7 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
         if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
           drawFirstFrameCallbackId = video.requestVideoFrameCallback(() => {
             drawFirstFrameCallbackId = null;
-            if (!stateRef.current.context) {
+            if (!stateRef.current.context || !stateRef.current.glAvailable) {
               return;
             }
             drawVideo(stateRef.current.context, video);
@@ -228,7 +296,11 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
 
         drawFirstFrameTimeout = setTimeout(() => {
           drawFirstFrameTimeout = null;
-          if (stateRef.current.videoEverPlayed || !stateRef.current.context) {
+          if (
+            stateRef.current.videoEverPlayed ||
+            !stateRef.current.context ||
+            !stateRef.current.glAvailable
+          ) {
             return;
           }
           // draw first frame
@@ -241,7 +313,6 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
       video.addEventListener('loadeddata', onLoadedData);
 
       // sync play state
-      let raf: number = 0;
       let isPendingUpdate = false;
       stateRef.current.handlePlayStateChange = () => {
         if (isPendingUpdate) {
@@ -263,7 +334,11 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
 
             const onFrame = () => {
               raf = requestAnimationFrame(onFrame);
-              if (!stateRef.current.context || !stateRef.current.canvasResizeValid) {
+              if (
+                !stateRef.current.context ||
+                !stateRef.current.glAvailable ||
+                !stateRef.current.canvasResizeValid
+              ) {
                 return;
               }
               drawVideo(stateRef.current.context, video);
@@ -304,7 +379,7 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
           const objectFit = stateRef.current.objectFit;
           const videoSize = stateRef.current.videoSize;
 
-          if (!canvasRef.current || !stateRef.current.context) {
+          if (!canvasRef.current || !stateRef.current.context || !stateRef.current.glAvailable) {
             return;
           }
 
@@ -439,6 +514,9 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
         });
         video.removeEventListener('loadeddata', onLoadedData);
 
+        canvas.removeEventListener('webglcontextlost', onContextLost);
+        canvas.removeEventListener('webglcontextrestored', onContextRestored);
+
         if (stateRef.current.context) {
           destroyGLContext(stateRef.current.context);
           stateRef.current.context = null;
@@ -452,7 +530,7 @@ export const TransparentVideo = forwardRef<TransparentVideoRef, TransparentVideo
     useEffect(() => {
       if (stateRef.current.preMultipliedAlpha !== preMultipliedAlpha) {
         stateRef.current.preMultipliedAlpha = preMultipliedAlpha;
-        if (stateRef.current.context) {
+        if (stateRef.current.context && stateRef.current.glAvailable) {
           setPremultipliedAlpha(stateRef.current.context, preMultipliedAlpha);
           // Force redraw
           // TODO: better update method
