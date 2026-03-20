@@ -32,6 +32,7 @@ TypeScript (strict), React 18.2+/19.0+, WebGL 1.0, Vite 7 (library mode), Storyb
 - **Resize** — Debounced (100ms) via shared `ResizeObserver`, supports fill/contain/cover
 - **DPR** — `matchMedia`-based pixel ratio monitoring for HiDPI
 - **Canvas resolution** — Capped at `min(videoSize, containerSize * DPR)`
+- **WebGL error handling** — Context creation failure, `webglcontextlost`/`webglcontextrestored` events, unified `onContextEvent` callback, `glAvailable` state tracking
 
 ## Source Layout
 ```
