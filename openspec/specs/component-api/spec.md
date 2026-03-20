@@ -70,6 +70,11 @@ The component SHALL expose an imperative API via `React.forwardRef` and `useImpe
 - **When** `ref.current.getVideoElement()` or `ref.current.getCanvasElement()` is called
 - **Then** the corresponding DOM element SHALL be returned
 
+#### Scenario: GL availability query
+- **Given** a ref to the `TransparentVideo` component
+- **When** `ref.current.glAvailable` is accessed
+- **Then** it SHALL return `true` if the WebGL context is available and usable, `false` if context creation failed or context is lost
+
 ### Requirement: Source Change Handling
 The component SHALL detect and respond to video source changes.
 

@@ -14,13 +14,14 @@ Enhanced for React.
 
 ## Enhancements
 
-- **Optimized for React** - Compatiable with React's ref and state management.
+- **Optimized for React** - Compatible with React's ref and state management.
 - **Automatic canvas resizing** - Canvas automatically resizes to match its display size.
 - **HIDPI/Retina support** - Automatically detects and adapts to high-DPI displays for crisp rendering.
 - **Automatic source refresh** - Video automatically reloads when source props change.
 - **Object-fit support** - Supports `contain`, `cover`, and `fill` modes for flexible video scaling.
 - **Optimized render size** - Canvas render size is optimized to be as small as possible based on video dimensions and container size.
 - **Optimized GL context** - Efficient WebGL context creation and cleanup.
+- **WebGL error handling** - Graceful handling of context creation failure, context loss and automatic restoration with event callbacks.
 
 ## Usage
 
@@ -52,6 +53,7 @@ import { TransparentVideo, TransparentVideoSource } from 'transparent-video-reac
 | `canvasProps`        | `React.HTMLProps<HTMLCanvasElement>`                 |          | Additional props for the canvas element                         |
 | `children`           | `TransparentVideoSource \| TransparentVideoSource[]` |          | `<TransparentVideoSource>` or `<TransparentVideo.Source>` nodes |
 | `onPlayStateChange`  | `(isPlaying: boolean) => void`                       |          | Callback when play state changes                                |
+| `onContextEvent`     | `(event: WebGLContextEvent) => void`                 |          | Callback when a WebGL context lifecycle event occurs            |
 
 ### `<TransparentVideoSource>` or `<TransparentVideo.Source>`
 
@@ -73,6 +75,54 @@ The `TransparentVideo` component exposes a `TransparentVideoRef` with the follow
 | `isPlaying`           | `boolean`                         | Whether the video is currently playing                                                          |
 | `getVideoElement()`   | `() => HTMLVideoElement \| null`  | Get the underlying video element                                                                |
 | `getCanvasElement()`  | `() => HTMLCanvasElement \| null` | Get the underlying canvas element                                                               |
+| `glAvailable`         | `boolean`                         | Whether the WebGL context is available and usable                                               |
+
+## WebGL Context Error Handling
+
+The component handles WebGL context lifecycle events gracefully:
+
+- **Creation failure** — If the browser cannot create a WebGL context, the component will not crash. Rendering is skipped and the `onContextEvent` callback fires with `type: 'creation-failed'`.
+- **Context lost** — When the GPU context is lost at runtime (e.g., GPU driver reset, resource pressure), the rendering loop stops and `onContextEvent` fires with `type: 'context-lost'`.
+- **Context restored** — When the browser restores the context, WebGL resources are automatically rebuilt, rendering resumes, and `onContextEvent` fires with `type: 'context-restored'`.
+
+Use the `onContextEvent` callback to show degradation UI (e.g., a fallback image or message) and query `ref.current.glAvailable` to check the current GL state at any time.
+
+### `WebGLContextEvent`
+
+```ts
+interface WebGLContextEvent {
+  type: 'creation-failed' | 'context-lost' | 'context-restored';
+  message: string;
+}
+```
+
+### Example: Error Handling
+
+```tsx
+import { TransparentVideo, TransparentVideoSource, type WebGLContextEvent } from 'transparent-video-react';
+
+function Player() {
+  const [glLost, setGlLost] = useState(false);
+
+  const handleContextEvent = (event: WebGLContextEvent) => {
+    console.log(`[GL] ${event.type}: ${event.message}`);
+    if (event.type === 'context-lost' || event.type === 'creation-failed') {
+      setGlLost(true);
+    } else if (event.type === 'context-restored') {
+      setGlLost(false);
+    }
+  };
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <TransparentVideo autoPlay loop muted onContextEvent={handleContextEvent}>
+        <TransparentVideoSource src="video.mp4" type="video/mp4" />
+      </TransparentVideo>
+      {glLost && <div className="fallback">Video unavailable</div>}
+    </div>
+  );
+}
+```
 
 ## Alpha Video Generation
 
